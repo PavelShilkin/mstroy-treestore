@@ -13,7 +13,7 @@ const store = new TreeStore(props.defaultItems);
 <template>
   <div class="app-shell">
     <header class="app-shell__header">
-      <h4 class="app-shell__header-title">Режим: просмотр</h4>
+      <div class="app-shell__header-title">Режим: просмотр</div>
     </header>
     <main class="app-shell__main">
       <TreeStoreGrid :store="store" />
@@ -25,10 +25,19 @@ const store = new TreeStore(props.defaultItems);
 .app-shell {
   width: 100%;
   height: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
 
   &__header {
     width: 100%;
     height: 100%;
+    color: rgb(74, 99, 242);
+    font-weight: 400;
   }
-}
+} 
 </style>

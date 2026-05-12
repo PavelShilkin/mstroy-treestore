@@ -3,9 +3,12 @@ import { AgGridVue } from 'ag-grid-vue3';
 import {
   type ColDef,
   type GetDataPath,
+  type GetRowClass,
   type GetRowIdParams,
   type GridApi,
   type GridReadyEvent,
+  type RowClassParams,
+  type RowClassRules,
   type ValueGetterParams,
 } from 'ag-grid-community';
 import { computed, onMounted, ref, shallowRef } from 'vue';
@@ -36,6 +39,7 @@ const columnDefs = computed<ColDef<TreeItem>[]>(() => [
   {
     headerName: 'Категория',
     flex: 1,
+    cellClass: 'tree-grid__cell--category',
     valueGetter: (p: ValueGetterParams<TreeItem>) => {
       if (!p.data) {
         return '';
@@ -48,6 +52,7 @@ const columnDefs = computed<ColDef<TreeItem>[]>(() => [
     field: 'label',
     headerName: 'Наименование',
     flex: 1,
+    cellClass: 'tree-grid__cell--name',
     ...DEFAULT_COLUMN_DEFS,
   },
 ]);
@@ -72,6 +77,14 @@ const autoGroupColumnDef = computed(
     ...DEFAULT_COLUMN_DEFS,
   }),
 );
+
+
+function getRowClass(p: RowClassParams<TreeItem>): string {
+  if (!p.node?.data?.id) {
+    return '';
+  }
+  return props.store.hasChildren(p.node.data.id) ? 'tree-grid__cell--parent' : '';
+}
 
 function getRowId(p: GetRowIdParams<TreeItem>): string {
   return String(p.data.id);
@@ -103,8 +116,11 @@ onMounted(() => {
       :column-defs="columnDefs"
       :row-data="rowData"
       :tree-data="true"
+      :header-height="40"
+      :row-height="40"
       :get-data-path="getDataPath"
       :get-row-id="getRowId"
+      :get-row-class="getRowClass"
       :auto-group-column-def="autoGroupColumnDef"
       :group-default-expanded="-1"
       :animate-rows="false"
@@ -116,12 +132,29 @@ onMounted(() => {
 <style scoped lang="scss">
 .tree-grid {
   width: 100%;
-  min-height: 25vh;
-  height: 25vh;
+  min-height: 80vh;
+  height: 80vh;
 
   &__inner {
     width: 100%;
     height: 100%;
+  }
+}
+
+:deep(.tree-grid__cell--parent) {
+  font-weight: bold;
+}
+
+:deep(.ag-cell-value) {
+  padding: 6px 12px !important;
+}
+
+:deep(.ag-header-cell) {
+  border: var(--ag-borders) var(--ag-border-color);
+  border-width: 0;
+  
+  &:not(:last-child) {
+    border-width: 0 1px 0 0; 
   }
 }
 </style>
