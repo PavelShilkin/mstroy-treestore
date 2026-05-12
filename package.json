@@ -1,0 +1,39 @@
+{
+  "name": "mstroy-treestore",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "ag-grid-community": "^35.2.1",
+    "ag-grid-enterprise": "^35.2.1",
+    "ag-grid-vue3": "^35.2.1",
+    "sass": "^1.99.0",
+    "vue": "^3.5.34"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.3",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vitest/coverage-v8": "^4.1.6",
+    "@vue/test-utils": "^2.4.10",
+    "@vue/tsconfig": "^0.9.1",
+    "eslint": "^10.3.0",
+    "eslint-plugin-vue": "^10.9.1",
+    "jsdom": "^29.1.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12",
+    "vitest": "^4.1.6",
+    "vue-eslint-parser": "^10.4.0",
+    "vue-tsc": "^3.2.8"
+  }
+}
