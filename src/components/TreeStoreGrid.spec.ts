@@ -71,4 +71,19 @@ describe('TreeStoreGrid', () => {
     expect(categoryCol.valueGetter?.({ data: items[1] })).toBe('Элемент');
     expect(categoryCol.valueGetter?.({})).toBe('');
   });
+
+  it('allows editing only the label column when editMode is true', async () => {
+    const store = new TreeStore(items);
+    const wrapper = mount(TreeStoreGrid, {
+      props: { store, editMode: true },
+      global: { stubs: { AgGridVue: true } },
+    });
+
+    await nextTick();
+    const grid = wrapper.findComponent(agGridSelector);
+    const columnDefs = grid.props('columnDefs') as Array<{ field?: string; editable?: boolean }>;
+    expect(columnDefs[0].editable).toBe(false);
+    expect(columnDefs[1].field).toBe('label');
+    expect(columnDefs[1].editable).toBe(true);
+  });
 });

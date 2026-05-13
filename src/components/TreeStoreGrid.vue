@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { AgGridVue } from 'ag-grid-vue3';
 import {
+  type CellValueChangedEvent,
   type ColDef,
+  type ColTypeDefs,
   type GetDataPath,
-  type GetRowClass,
   type GetRowIdParams,
   type GridApi,
   type GridReadyEvent,
   type RowClassParams,
-  type RowClassRules,
   type ValueGetterParams,
 } from 'ag-grid-community';
-import { computed, onMounted, ref, shallowRef } from 'vue';
+import { computed, onMounted, ref, shallowRef, watch } from 'vue';
 import '../agGridRegister';
 import type { TreeItem, TreeItemBase } from '../treeStore/types';
 import { TreeStore } from '../treeStore/TreeStore';
@@ -28,8 +28,11 @@ const DEFAULT_COLUMN_DEFS: ColDef<TreeItem> = {
 const props = (
   defineProps<{
     store: TreeStore<TreeItemBase>;
+    editMode?: boolean;
   }>()
 );
+
+const editMode = computed(() => props.editMode === true);
 
 const getDataPath: GetDataPath<TreeItem> = (data) =>
   props.store.getPathKeysFromRoot(data.id);
@@ -40,6 +43,7 @@ const columnDefs = computed<ColDef<TreeItem>[]>(() => [
     headerName: 'Категория',
     flex: 1,
     cellClass: 'tree-grid__cell--category',
+    editable: false,
     valueGetter: (p: ValueGetterParams<TreeItem>) => {
       if (!p.data) {
         return '';
@@ -51,8 +55,10 @@ const columnDefs = computed<ColDef<TreeItem>[]>(() => [
   {
     field: 'label',
     headerName: 'Наименование',
+    type: 'editableColumn',
     flex: 1,
     cellClass: 'tree-grid__cell--name',
+    editable: editMode.value,
     ...DEFAULT_COLUMN_DEFS,
   },
 ]);
@@ -61,6 +67,7 @@ const autoGroupColumnDef = computed(
   (): ColDef<TreeItem> => ({
     headerName: '№ п/п',
     flex: 1,
+    editable: false,
     cellRendererParams: {
       suppressCount: true,
     },
@@ -77,6 +84,20 @@ const autoGroupColumnDef = computed(
     ...DEFAULT_COLUMN_DEFS,
   }),
 );
+
+const columnTypes = ref<ColTypeDefs>({
+  editableColumn: {
+      editable: () => {
+        return props.editMode;
+      },
+      cellStyle: () => {
+        return { backgroundColor: props.editMode ? "#f4f4f4" : "transparent", color: props.editMode ? "#4a63f2" : "inherit" };
+      },
+      cellClass: () => {
+        return props.editMode ? 'tree-grid__cell--editable' : '';
+      },
+  },
+});
 
 
 function getRowClass(p: RowClassParams<TreeItem>): string {
@@ -102,6 +123,28 @@ function onGridReady(e: GridReadyEvent<TreeItem>): void {
   gridApi.value = e.api;
 }
 
+function onCellValueChanged(e: CellValueChangedEvent<TreeItem>): void {
+  if (!editMode.value || e.colDef.field !== 'label') {
+    return;
+  }
+  const data = e.data;
+  if (!data) {
+    return;
+  }
+  const label = String(e.newValue ?? '');
+  props.store.updateItem({ ...data, label } as TreeItem);
+  pushRowData();
+}
+
+watch(
+  () => props.editMode,
+  (enabled) => {
+    if (!enabled) {
+      gridApi.value?.stopEditing();
+    }
+  },
+);
+
 onMounted(() => {
   pushRowData();
 });
@@ -118,13 +161,17 @@ onMounted(() => {
       :tree-data="true"
       :header-height="40"
       :row-height="40"
+      :default-col-def="{ editable: false }"
       :get-data-path="getDataPath"
       :get-row-id="getRowId"
       :get-row-class="getRowClass"
       :auto-group-column-def="autoGroupColumnDef"
       :group-default-expanded="-1"
       :animate-rows="false"
+      :column-types="columnTypes"
+      :stop-editing-when-cells-lose-focus="true"
       @grid-ready="onGridReady"
+      @cell-value-changed="onCellValueChanged"
     />
   </div>
 </template>

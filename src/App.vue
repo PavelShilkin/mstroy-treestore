@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import TreeStoreGrid from './components/TreeStoreGrid.vue';
 import { TreeStore } from './treeStore';
 import type { TreeItem } from './treeStore';
@@ -8,15 +9,27 @@ const props = defineProps<{
 }>();
 
 const store = new TreeStore(props.defaultItems);
+
+const editMode = ref(false);
+
+function toggleEditMode(): void {
+  editMode.value = !editMode.value;
+}
 </script>
 
 <template>
   <div class="app-shell">
     <header class="app-shell__header">
-      <div class="app-shell__header-title">Режим: просмотр</div>
+      <button
+        type="button"
+        class="app-shell__header-title"
+        @click="toggleEditMode"
+      >
+        {{ editMode ? 'Режим: редактирование' : 'Режим: просмотр' }}
+      </button>
     </header>
     <main class="app-shell__main">
-      <TreeStoreGrid :store="store" />
+      <TreeStoreGrid :store="store" :edit-mode="editMode" />
     </main>
   </div>
 </template>
@@ -36,8 +49,24 @@ const store = new TreeStore(props.defaultItems);
   &__header {
     width: 100%;
     height: 100%;
-    color: rgb(74, 99, 242);
+    color: #4a63f2;
     font-weight: 400;
   }
-} 
+
+  &__header-title {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
 </style>
